@@ -1,0 +1,22 @@
+---
+- name: Install git ssh key
+  file:
+    content: "{{ ferm_firewall_ssh_key }}"
+    dest: /etc/ferm.ssh.key
+  when: ferm_firewall_ssh_key is defined
+
+- name: Install valid host keys
+  known_hosts:
+    key: "{{ item }}"
+    name: "{{ ferm_firewall_repo | urlsplit('hostname') }}"
+  when: ferm_firewall_accept_hostkeys is defined
+
+- name: Install firewall rules frome remote repo
+  git:
+    accept_hostkey: "{{ ferm_firewall_ignore_hostkey }}"
+    depth: 1
+    dest: /etc/ferm/
+    force: yes
+    remote: "{{ ferm_firewall_repo }}"
+    version: "{{ ferm_firewall_version }}"
+    track_submodules: "{{ ferm_firewall_upstream_submodules }}"
