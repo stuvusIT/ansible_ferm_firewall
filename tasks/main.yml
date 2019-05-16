@@ -1,0 +1,30 @@
+---
+- name: Install ferm and rsync
+  apt:
+    name:
+      - ferm
+      - rsync
+
+- name: Clone ferm config repo to local machine
+  git:
+    repo: "{{ ferm_firewall_repo }}"
+    version: "{{ ferm_firewall_version }}"
+    dest: "{{ global_cache_dir | mandatory }}/ferm_firewall"
+    depth: 1
+    force: yes
+    track_submodules: "{{ ferm_firewall_upstream_submodules }}"
+  become: no
+  run_once: true
+  delegate_to: localhost
+
+- name: Transfer ferm directory to target machine
+  synchronize:
+    src: "{{ global_cache_dir | mandatory }}/ferm_firewall/"
+    dest: /etc/ferm
+    # Don't preserve local owner and group
+    owner: false
+    group: false
+    rsync_opts:
+      - --exclude=.git
+  notify: Enable and restart ferm
+

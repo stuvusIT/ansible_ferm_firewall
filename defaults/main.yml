@@ -1,0 +1,3 @@
+---
+ferm_firewall_version: master
+ferm_firewall_upstream_submodules: True
